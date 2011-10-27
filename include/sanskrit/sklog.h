@@ -38,6 +38,14 @@
 #  define SK_INLINE
 #endif
 
+/* Log levels */
+#if 1 /* ASL */
+#  define SKLOG_LEVEL_INFO    ASL_LEVEL_INFO
+#  define SKLOG_LEVEL_DEBUG   ASL_LEVEL_DEBUG
+#  define SKLOG_LEVEL_WARN    ASL_LEVEL_WARNING
+#  define SKLOG_LEVEL_ERR     ASL_LEVEL_ERR
+#endif
+
 #define _SKLOG_IMPL(LOG_LEVEL)                        \
    {                                                  \
       va_list vl;                                     \
@@ -78,17 +86,17 @@ static void sklogv(int log_level, const char* format, va_list vargs)
 #  ifndef SK_DISABLE_INFO
 static SK_INLINE void skinfo(const char* format, ...)
 {
-   _SKLOG_IMPL(ASL_LEVEL_INFO);
+   _SKLOG_IMPL(SKLOG_LEVEL_INFO);
 }
 #  else
 static SK_INLINE void skinfo(const char* format, ...) {}
 #  endif
 
 /* Debug */
-#  ifndef SK_DISABLE_WARN
+#  ifndef SK_DISABLE_DEBUG
 static SK_INLINE void skdebug(const char* format, ...)
 {
-   _SKLOG_IMPL(ASL_LEVEL_DEBUG);
+   _SKLOG_IMPL(SKLOG_LEVEL_DEBUG);
 }
 #  else
 static SK_INLINE void skdebug(const char* format, ...) {}
@@ -98,7 +106,7 @@ static SK_INLINE void skdebug(const char* format, ...) {}
 #  ifndef SK_DISABLE_WARN
 static SK_INLINE void skwarn(const char* format, ...)
 {
-   _SKLOG_IMPL(ASL_LEVEL_WARNING);
+   _SKLOG_IMPL(SKLOG_LEVEL_WARN);
 }
 #  else
 static SK_INLINE void skwarn(const char* format, ...) {}
@@ -108,7 +116,7 @@ static SK_INLINE void skwarn(const char* format, ...) {}
 #  ifndef SK_DISABLE_ERROR
 static SK_INLINE void skerr(const char* format, ...)
 {
-   _SKLOG_IMPL(ASL_LEVEL_ERR);
+   _SKLOG_IMPL(SKLOG_LEVEL_ERR);
 }
 #  else
 static SK_INLINE void skerr(const char* format, ...) {}
