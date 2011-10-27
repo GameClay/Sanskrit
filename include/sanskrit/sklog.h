@@ -25,6 +25,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/* Disable unused function warnings for GCC */
+#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 6)
+#  define _SK_UNUSED_FUNC_WARNING_DISABLED_
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wunused-function"
+#endif
+
 #if 0
 #  define SK_INLINE inline
 #else
@@ -107,6 +114,18 @@ static SK_INLINE void skerr(const char* format, ...)
 static SK_INLINE void skerr(const char* format, ...) {}
 #  endif
 
+/* Prevent warnings/errors about unused functions */
+#ifndef _SK_UNUSED_FUNC_WARNING_DISABLED_
+static void _sk_disable_unused_never_call_this_()
+{
+   skinfo("");
+   skdebug("");
+   skwarn("");
+   skerr("");
+   _sk_disable_unused_never_call_this_();
+}
+#endif
+
 #else
 /* Disable all the things */
 static SK_INLINE void skinfo(const char* format, ...) {}
@@ -115,4 +134,8 @@ static SK_INLINE void skwarn(const char* format, ...) {}
 static SK_INLINE void skerr(const char* format, ...) {}
 #endif
 
+#endif
+
+#if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 6)
+#     pragma GCC diagnostic pop
 #endif
