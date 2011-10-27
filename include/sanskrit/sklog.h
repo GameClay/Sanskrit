@@ -55,25 +55,32 @@
    }
 
 static aslclient _sklog_asl_client;
-static int _sklog_enabled = 1;
+static int _sklog_enabled = 0;
+
+static int sklog_init()
+{
+   _sklog_asl_client = asl_open("SkLog", "com.apple.console", ASL_OPT_STDERR | ASL_OPT_NO_DELAY);
+   _sklog_enabled = (_sklog_asl_client == NULL ? 0 : 1);
+   return (_sklog_enabled == 1 ? 0 : -1);
+}
+
+static void sklog_destroy()
+{
+   _sklog_enabled = 0;
+   if(_sklog_asl_client != NULL)
+   {
+      asl_close(_sklog_asl_client);
+   }
+}
 
 static void sklogv(int log_level, const char* format, va_list vargs)
 {
-   if(_sklog_asl_client == NULL)
-   {
-      _sklog_asl_client = asl_open("SkLog", "com.apple.console", ASL_OPT_STDERR | ASL_OPT_NO_DELAY);
-      if(_sklog_asl_client == NULL)
-      {
-         fprintf(stderr, "[Sanskrit]: Unable to create ASL client. Disabling logging.\n");
-         _sklog_enabled = 0;
-      }
-   }
-
    if(_sklog_enabled)
    {
       aslmsg msg = asl_new(ASL_TYPE_MSG);
       asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
       asl_vlog(_sklog_asl_client, msg, log_level, format, vargs);
+      asl_free(msg);
    }
 }
 
@@ -126,6 +133,8 @@ static SK_INLINE void skerr(const char* format, ...) {}
 #ifndef _SK_UNUSED_FUNC_WARNING_DISABLED_
 static void _sk_disable_unused_never_call_this_()
 {
+   sklog_init();
+   sklog_destroy();
    skinfo("");
    skdebug("");
    skwarn("");
