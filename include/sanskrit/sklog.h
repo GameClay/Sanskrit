@@ -46,6 +46,13 @@
 #  define SKLOG_LEVEL_ERR     ASL_LEVEL_ERR
 #endif
 
+/* Redefine this to change the source-name of the log messages */
+#ifndef SK_LOG_IDENT
+#  define SK_LOG_IDENT Sanskrit
+#endif
+#define _SK_STRINGIFY(x) #x
+#define SK_STRINGIFY(x) _SK_STRINGIFY(x)
+
 #define _SKLOG_IMPL(LOG_LEVEL)                        \
    {                                                  \
       va_list vl;                                     \
@@ -59,7 +66,7 @@ static int _sklog_enabled = 0;
 
 static int sklog_init()
 {
-   _sklog_asl_client = asl_open("SkLog", "com.apple.console", ASL_OPT_STDERR | ASL_OPT_NO_DELAY);
+   _sklog_asl_client = asl_open(SK_STRINGIFY(SK_LOG_IDENT), "com.apple.console", ASL_OPT_STDERR | ASL_OPT_NO_DELAY);
    _sklog_enabled = (_sklog_asl_client == NULL ? 0 : 1);
    return (_sklog_enabled == 1 ? 0 : -1);
 }
