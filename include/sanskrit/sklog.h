@@ -19,7 +19,11 @@
 #ifndef _SANSKRIT_H_
 #define _SANSKRIT_H_
 
-#include <asl.h>
+#if defined(SKLOG_ASL)
+#  include <asl.h>
+#elif defined(SKLOG_SYSLOG)
+#  include <syslog.h>
+#endif
 
 #include <stdarg.h>
 #include <stdlib.h>
@@ -39,16 +43,26 @@
 #endif
 
 /* Log levels */
-#if 1 /* ASL */
-#  define SKLOG_LEVEL_INFO    ASL_LEVEL_INFO
+#if defined(SKLOG_ASL)
 #  define SKLOG_LEVEL_DEBUG   ASL_LEVEL_DEBUG
+#  define SKLOG_LEVEL_INFO    ASL_LEVEL_INFO
 #  define SKLOG_LEVEL_WARN    ASL_LEVEL_WARNING
 #  define SKLOG_LEVEL_ERR     ASL_LEVEL_ERR
+#elif defined(SKLOG_SYSLOG)
+#  define SKLOG_LEVEL_DEBUG   LOG_DEBUG
+#  define SKLOG_LEVEL_INFO    LOG_INFO
+#  define SKLOG_LEVEL_WARN    LOG_WARNING
+#  define SKLOG_LEVEL_ERR     LOG_ERR
+#else
+#  define SKLOG_LEVEL_DEBUG   0
+#  define SKLOG_LEVEL_INFO    1
+#  define SKLOG_LEVEL_WARN    3
+#  define SKLOG_LEVEL_ERR     4
 #endif
 
 /* Redefine this to change the source-name of the log messages */
-#ifndef SK_LOG_IDENT
-#  define SK_LOG_IDENT Sanskrit
+#ifndef SKLOG_IDENT
+#  define SKLOG_IDENT Sanskrit
 #endif
 #define _SK_STRINGIFY(x) #x
 #define SK_STRINGIFY(x) _SK_STRINGIFY(x)
@@ -61,33 +75,55 @@
       va_end(vl);                                     \
    }
 
+#if defined(SKLOG_ASL)
 static aslclient _sklog_asl_client;
+#endif
 static int _sklog_enabled = 0;
 
 static int sklog_init()
 {
-   _sklog_asl_client = asl_open(SK_STRINGIFY(SK_LOG_IDENT), "com.apple.console", ASL_OPT_STDERR | ASL_OPT_NO_DELAY);
+#if defined(SKLOG_ASL)
+   _sklog_asl_client = asl_open(SK_STRINGIFY(SKLOG_IDENT), "com.apple.console", ASL_OPT_STDERR | ASL_OPT_NO_DELAY);
    _sklog_enabled = (_sklog_asl_client == NULL ? 0 : 1);
+#elif defined(SKLOG_SYSLOG)
+   _sklog_enabled = 1;
+   openlog(SK_STRINGIFY(SKLOG_IDENT), LOG_PERROR | LOG_NDELAY | LOG_PID, LOG_USER);
+#else
+   _sklog_enabled = 1;
+#endif
+
    return (_sklog_enabled == 1 ? 0 : -1);
 }
 
 static void sklog_destroy()
 {
    _sklog_enabled = 0;
+#if defined(SKLOG_ASL)
    if(_sklog_asl_client != NULL)
    {
       asl_close(_sklog_asl_client);
    }
+#elif defined(SKLOG_SYSLOG)
+   closelog();
+#endif
 }
 
 static void sklogv(int log_level, const char* format, va_list vargs)
 {
    if(_sklog_enabled)
    {
+#if defined(SKLOG_ASL)
       aslmsg msg = asl_new(ASL_TYPE_MSG);
       asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
       asl_vlog(_sklog_asl_client, msg, log_level, format, vargs);
       asl_free(msg);
+#elif defined(SKLOG_SYSLOG)
+      vsyslog(log_level, format, vargs);
+#else
+      fprintf(stderr, "<" SK_STRINGIFY(SKLOG_IDENT) ">: ");
+      vfprintf(stderr, format, vargs);
+      fprintf(stderr, "\n");
+#endif
    }
 }
 

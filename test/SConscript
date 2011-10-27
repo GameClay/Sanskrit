@@ -4,5 +4,6 @@ Import('env')
 test = env.Program('sanskrit', 
    Glob('*.c', strings=True),
    CPPPATH = ['.'] + env['SANSKRIT_INCLUDE'],
+   CPPDEFINES=["SKLOG_SYSLOG"],
    CCFLAGS = ['-std=c89','-Werror','-pedantic','-ggdb'],
 )

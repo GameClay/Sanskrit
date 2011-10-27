@@ -7,10 +7,10 @@ int main()
 {
    sklog_init();
 
-   sklog("sklog!\n");
-   skdebug("skdebug!\n");
-   skwarn("skwarn!\n");
-   skerr("skerr!\n");
+   sklog("sklog!");
+   skdebug("skdebug!");
+   skwarn("skwarn!");
+   skerr("skerr!");
 
    sklog_destroy();
    return 0;
