@@ -1,0 +1,8 @@
+Import('env')
+
+# Build sdk library
+test = env.Program('sanskrit', 
+   Glob('*.c', strings=True),
+   CPPPATH = ['.'] + env['SANSKRIT_INCLUDE'],
+   CCFLAGS = ['-std=c99','-Werror','-pedantic','-ggdb'],
+)
