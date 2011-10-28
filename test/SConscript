@@ -6,4 +6,6 @@ test = env.Program('sanskrit',
    CPPPATH = ['.'] + env['SANSKRIT_INCLUDE'],
    CPPDEFINES=["SKLOG_SYSLOG"],
    CCFLAGS = ['-std=c89','-Werror','-pedantic','-ggdb'],
+   LIBPATH= env['SANSKRIT_LIB'],
+   LIBS = ['sanskrit']
 )

@@ -1,0 +1,9 @@
+Import('env')
+
+libsanskrit = env.StaticLibrary('sanskrit',
+   Glob('*.c', strings=True),
+   CPPPATH = ['.'] + env['SANSKRIT_INCLUDE'],
+   CCFLAGS = ['-std=c89','-Werror','-Wall','-ggdb']
+)
+
+Return('libsanskrit')

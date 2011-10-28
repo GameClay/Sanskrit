@@ -75,57 +75,31 @@
       va_end(vl);                                     \
    }
 
-#if defined(SKLOG_ASL)
-static aslclient _sklog_asl_client;
-#endif
-static int _sklog_enabled = 0;
+/**
+ * Initialize Sanskrit.
+ *
+ * This function must be called before any other logging function to
+ * initialize syslog or asl.
+ *
+ * @return 0 if successful, 1 otherwise.
+ */
+extern int sklog_init();
 
-static int sklog_init()
-{
-#if defined(SKLOG_ASL)
-   _sklog_asl_client = asl_open(SK_STRINGIFY(SKLOG_IDENT), "com.apple.console", ASL_OPT_STDERR | ASL_OPT_NO_DELAY);
-   _sklog_enabled = (_sklog_asl_client == NULL ? 0 : 1);
-#elif defined(SKLOG_SYSLOG)
-   _sklog_enabled = 1;
-   openlog(SK_STRINGIFY(SKLOG_IDENT), LOG_PERROR | LOG_NDELAY | LOG_PID, LOG_USER);
-#else
-   _sklog_enabled = 1;
-#endif
+/**
+ * Destroy Sanskrit.
+ */
+extern void sklog_destroy();
 
-   return (_sklog_enabled == 1 ? 0 : -1);
-}
-
-static void sklog_destroy()
-{
-   _sklog_enabled = 0;
-#if defined(SKLOG_ASL)
-   if(_sklog_asl_client != NULL)
-   {
-      asl_close(_sklog_asl_client);
-   }
-#elif defined(SKLOG_SYSLOG)
-   closelog();
-#endif
-}
-
-static void sklogv(int log_level, const char* format, va_list vargs)
-{
-   if(_sklog_enabled)
-   {
-#if defined(SKLOG_ASL)
-      aslmsg msg = asl_new(ASL_TYPE_MSG);
-      asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
-      asl_vlog(_sklog_asl_client, msg, log_level, format, vargs);
-      asl_free(msg);
-#elif defined(SKLOG_SYSLOG)
-      vsyslog(log_level, format, vargs);
-#else
-      fprintf(stderr, "<" SK_STRINGIFY(SKLOG_IDENT) ">: ");
-      vfprintf(stderr, format, vargs);
-      fprintf(stderr, "\n");
-#endif
-   }
-}
+/**
+ * Core logging function.
+ *
+ * All other log functions call this function for logging.
+ *
+ * @param log_level  One of: SKLOG_LEVEL_DEBUG, SKLOG_LEVEL_INFO, SKLOG_LEVEL_WARN, SKLOG_LEVEL_ERR
+ * @param format     String format.
+ * @param vargs      Args to go with format
+ */
+extern void sklogv(int log_level, const char* format, va_list vargs);
 
 /* sklog == skinfo */
 #define sklog skinfo
@@ -176,8 +150,6 @@ static SK_INLINE void skerr(const char* format, ...) {}
 #ifndef _SK_UNUSED_FUNC_WARNING_DISABLED_
 static void _sk_disable_unused_never_call_this_()
 {
-   sklog_init();
-   sklog_destroy();
    skinfo("");
    skdebug("");
    skwarn("");
