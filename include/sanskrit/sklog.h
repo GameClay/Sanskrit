@@ -148,13 +148,19 @@ static SK_INLINE void skerr(const char* format, ...) {}
 
 /* Prevent warnings/errors about unused functions */
 #ifndef _SK_UNUSED_FUNC_WARNING_DISABLED_
-static void _sk_disable_unused_never_call_this_()
+static void _sk_disable_unused_never_call_this_2_();
+static void _sk_disable_unused_never_call_this_1_()
 {
    skinfo("");
    skdebug("");
    skwarn("");
    skerr("");
-   _sk_disable_unused_never_call_this_();
+   _sk_disable_unused_never_call_this_2_();
+}
+
+static void _sk_disable_unused_never_call_this_2_()
+{
+   _sk_disable_unused_never_call_this_1_();
 }
 #endif
 
