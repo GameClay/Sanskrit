@@ -63,6 +63,8 @@ void sklogv(int log_level, const char* format, va_list vargs)
       asl_free(msg);
 #elif defined(SKLOG_SYSLOG)
       vsyslog(log_level, format, vargs);
+#elif defined(SKLOG_ANDROID)
+      __android_log_vprint(log_level, SK_STRINGIFY(SKLOG_IDENT), format, vargs);
 #else
       fprintf(stderr, "<" SK_STRINGIFY(SKLOG_IDENT) ">: ");
       vfprintf(stderr, format, vargs);

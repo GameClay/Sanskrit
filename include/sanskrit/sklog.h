@@ -23,6 +23,8 @@
 #  include <asl.h>
 #elif defined(SKLOG_SYSLOG)
 #  include <syslog.h>
+#elif defined(SKLOG_ANDROID)
+#  include <android/log.h> 
 #endif
 
 #include <stdarg.h>
@@ -53,6 +55,11 @@
 #  define SKLOG_LEVEL_INFO    LOG_INFO
 #  define SKLOG_LEVEL_WARN    LOG_WARNING
 #  define SKLOG_LEVEL_ERR     LOG_ERR
+#elif defined(SKLOG_ANDROID)
+#  define SKLOG_LEVEL_DEBUG   ANDROID_LOG_DEBUG
+#  define SKLOG_LEVEL_INFO    ANDROID_LOG_INFO
+#  define SKLOG_LEVEL_WARN    ANDROID_LOG_WARN
+#  define SKLOG_LEVEL_ERR     ANDROID_LOG_ERROR
 #else
 #  define SKLOG_LEVEL_DEBUG   0
 #  define SKLOG_LEVEL_INFO    1
